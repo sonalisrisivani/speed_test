@@ -8,7 +8,7 @@ function startTest() {
 
 function measurePing() {
     const startTime = performance.now();
-    fetch('https://www.google.com/images/phd/px.gif')
+    fetch('https://api.github.com')
         .then(() => {
             const endTime = performance.now();
             const ping = Math.round(endTime - startTime);
@@ -39,13 +39,13 @@ function measureDownloadSpeed() {
 }
 
 function measureUploadSpeed() {
-    const data = new Blob([new ArrayBuffer(12200)]);
+    const xhr = new XMLHttpRequest();
+    const data = new Blob([new ArrayBuffer(12200)]); // 12KB blob
     const startTime = performance.now();
-    fetch('https://www.google.com/images/phd/px.gif', {
-        method: 'POST',
-        body: data
-    })
-        .then(() => {
+
+    xhr.open('POST', 'https://jsonplaceholder.typicode.com/posts', true);
+    xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
             const endTime = performance.now();
             const duration = (endTime - startTime) / 1000;
             const dataSize = 12200 * 8; // size in bits
@@ -53,8 +53,12 @@ function measureUploadSpeed() {
             const speedKbps = speedBps / 1024;
             const speedMbps = speedKbps / 1024;
             document.getElementById('upload').textContent = `${speedMbps.toFixed(2)} Mbps`;
-        })
-        .catch(() => {
+        } else {
             document.getElementById('upload').textContent = 'Error';
-        });
+        }
+    };
+    xhr.onerror = () => {
+        document.getElementById('upload').textContent = 'Error';
+    };
+    xhr.send(data);
 }
